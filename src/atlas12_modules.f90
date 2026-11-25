@@ -1114,7 +1114,7 @@ MODULE mod_atlas_data
   REAL(8)  :: AC2(kw), AN1(kw), AO1(kw), AMG2(kw), ASI2(kw), ACA2(kw)
 
   ! --- Convection parameters ---
-  REAL(8)  :: DLTDLP(kw) = 0.0d0, HEATCP(kw) = 0.0d0, DLRDLT(kw) = 0.0d0, VELSND(kw) = 0.0d0
+  REAL(8)  :: DLTDLP(kw) = 0.0d0, HEATCP(kw) = 0.0d0, DLRDLT(kw) = 0.0d0, VELSND(kw) = 0.0d0, GAMMA1(kw) = 0.0d0
   REAL(8)  :: GRDADB(kw) = 0.0d0, HSCALE(kw) = 0.0d0, FLXCNV(kw) = 0.0d0, VCONV(kw) = 0.0d0
   REAL(8)  :: MIXLTH = 2.0d0, OVERWT = 0.0d0
   REAL(8)  :: FLXCNV0(kw), FLXCNV1(kw)
@@ -2486,12 +2486,12 @@ SUBROUTINE PUTOUT(MODE)
     !                  continuum optical depth at 5000 A.  Only the first
     !                  seven columns are read back by READIN.
     WRITE(7, 554) NRHOX, (RHOX(J), T(J), P(J), XNE(J), ABROSS(J), ACCRAD(J), &
-      VTURB(J), FLXCNV(J), VCONV(J), RHO(J), TAU5000_L(J), J=1,NRHOX)
+      VTURB(J), FLXCNV(J), VCONV(J), RHO(J), TAU5000_L(J), VELSND(J), HEATCP(J), GAMMA1(J), J=1,NRHOX)
 554 FORMAT('READ DECK6', I4, &
       '    RHOX         T         P       XNE', &
       '     ABROSS    ACCRAD     VTURB    FLXCNV     VCONV       RHO', &
-      '   TAU5000' &
-      / (13X, 1PE12.5, 0PF10.2, 1P9E10.3))
+      '   TAU5000    VELSND    HEATCP    GAMMA1' &
+      / (13X, 1PE12.5, 0PF10.2, 1P12E10.3))
 
     ! Surface radiation pressure constant
     WRITE(7, '("PRADK",1PE11.4)') PRADK0
@@ -11310,6 +11310,7 @@ SUBROUTINE CONVEC(MLT_ONLY)
       VELSND(J) = 0.0D0
     ELSE
       VELSND(J) = sqrt(max(HEATCP(J) / HEATCV * DPDPG / DRDPG, 0.0D0))
+      GAMMA1(J)=VELSND(J)**2*RHO(J)/PTOTAL(J)
     END IF
 
     ! Density response and adiabatic gradient
